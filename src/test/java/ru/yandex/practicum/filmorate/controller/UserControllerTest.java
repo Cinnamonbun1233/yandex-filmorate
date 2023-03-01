@@ -25,11 +25,6 @@ public class UserControllerTest {
     private Validator validator = factory.getValidator();
 
     @BeforeEach
-    void UserControllerInit() {
-        userController = new UserController();
-    }
-
-    @BeforeEach
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
