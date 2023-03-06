@@ -43,7 +43,7 @@ public class FilmControllerTest {
     void duplicateFilmTest() {
         film = new Film(MOVIE_TEST, DESCRIPTION_TEST, RELEASE_TEST, DURATION_TEST);
         film.setId(1);
-        filmController.films.put(film.getId(), film);
+        filmController.getFilms().put(film.getId(), film);
         assertThrows(ValidationException.class, () -> filmController.validate(film));
     }
 
@@ -97,7 +97,11 @@ public class FilmControllerTest {
 
     @Test
     void lengthDescriptionAbove200Test() {
-        film = new Film(MOVIE_TEST, "Interstellar is a 2014 epic science fiction film co-written, directed," + "and produced by Christopher Nolan. It stars Matthew McConaughey, Anne Hathaway, Jessica Chastain," + "Bill Irwin, Ellen Burstyn, Matt Damon, and Michael Caine. Set in a dystopian future where humanity is" + "struggling to survive, the film follows a group of astronauts who travel through a wormhole near Saturn" + "in search of a new home for mankind. ", LocalDate.of(1894, 1, 2), 169);
+        film = new Film(MOVIE_TEST, "Interstellar is a 2014 epic science fiction film co-written, directed,"
+                + "and produced by Christopher Nolan. It stars Matthew McConaughey, Anne Hathaway, Jessica Chastain,"
+                + "Bill Irwin, Ellen Burstyn, Matt Damon, and Michael Caine. Set in a dystopian future where humanity is"
+                + "struggling to survive, the film follows a group of astronauts who travel through a wormhole near Saturn"
+                + "in search of a new home for mankind. ", LocalDate.of(1894, 1, 2), 169);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -48,7 +47,7 @@ public class UserControllerTest {
     void duplicateUserTest() {
         user = new User(TEST_EMAIL, TEST_LOGIN, TEST_DATE);
         user.setId(1);
-        userController.users.put(user.getId(), user);
+        userController.getUsers().put(user.getId(), user);
         assertThrows(ValidationException.class, () -> userController.validate(user));
     }
 
