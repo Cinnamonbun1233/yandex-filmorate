@@ -10,6 +10,7 @@ import java.time.LocalDate;
 
 @Data
 public class Film {
+    private int id;
     @NotBlank
     private final String name;
     @NotBlank
@@ -19,5 +20,4 @@ public class Film {
     private final LocalDate releaseDate;
     @Min(value = 1)
     private final long duration;
-    private int id;
 }

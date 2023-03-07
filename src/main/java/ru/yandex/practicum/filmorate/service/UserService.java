@@ -2,20 +2,42 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
+@Service
 @Data
 public class UserService {
-    protected final Map<Integer, User> users = new HashMap<>();
-    protected int userId = 1;
+    private final Map<Integer, User> users = new HashMap<>();
+    private int userId = 1;
+
+    public List<User> showAllUsers() {
+        return new ArrayList<>(users.values());
+    }
+
+    public User createNewUser(User user) {
+        validate(user);
+        user.setId(userId++);
+        users.put(user.getId(), user);
+        log.info("Добавлен пользователь с логином '{}'.", user.getLogin());
+        return user;
+    }
+
+    public User updateUser(User user) {
+        if (!users.containsKey(user.getId())) {
+            throw new ValidationException("Такого пользователя не существует, необходима регистрация нового пользователя");
+        }
+        users.remove(user.getId());
+        users.put(user.getId(), user);
+        log.info("Информация о пользователе '{}' обновлена.", user.getLogin());
+        return user;
+    }
 
     public void validate(@Valid @RequestBody User user) {
         if (user.getLogin().contains(" ")) {

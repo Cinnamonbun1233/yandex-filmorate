@@ -1,41 +1,33 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import ru.yandex.practicum.filmorate.service.FilmService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
 import java.util.*;
 
-@Slf4j
 @RestController
 @RequestMapping("/films")
-public class FilmController extends FilmService {
+public class FilmController {
+    FilmService filmService;
+
+    FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
+
     @GetMapping
-    public List<Film> showAllUsers() {
-        return new ArrayList<>(films.values());
+    public List<Film> showAllFilms() {
+        return filmService.showAllFilms();
     }
 
     @PostMapping
-    public Film createNewUser(@Valid @RequestBody Film film) {
-        validate(film);
-        film.setId(filmId++);
-        films.put(film.getId(), film);
-        log.info("Фильм '{}' добавлен в коллекцию.", film.getName());
-        return film;
+    public Film createNewFilm(@Valid @RequestBody Film film) {
+        return filmService.createNewFilm(film);
     }
 
     @PutMapping
-    public Film updateNewUser(@Valid @RequestBody Film film) {
-        validate(film);
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Такого фильма нет в коллекции.");
-        }
-        films.remove(film.getId());
-        films.put(film.getId(), film);
-        log.info("Информация о фильме '{}' обновлена.", film.getName());
-        return film;
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        return filmService.updateFilm(film);
     }
 }

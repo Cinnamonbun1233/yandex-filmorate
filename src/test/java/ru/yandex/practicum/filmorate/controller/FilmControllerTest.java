@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -22,7 +23,7 @@ public class FilmControllerTest {
             "directed, and produced by Christopher Nolan.";
     private final static LocalDate RELEASE_TEST = LocalDate.of(2014, 10, 26);
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    FilmController filmController;
+    FilmService filmService;
     Film film;
     private Validator validator = factory.getValidator();
 
@@ -30,21 +31,21 @@ public class FilmControllerTest {
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        filmController = new FilmController();
+        filmService = new FilmService();
     }
 
     @Test
     void releaseDateBefore1985() {
-        film = new Film(MOVIE_TEST, DESCRIPTION_TEST, LocalDate.of(1894, 1, 2), DURATION_TEST);
-        assertThrows(ValidationException.class, () -> filmController.validate(film));
+        film = new Film(MOVIE_TEST, DESCRIPTION_TEST, LocalDate.of(1894, 1, 1), DURATION_TEST);
+        assertThrows(ValidationException.class, () -> filmService.validate(film));
     }
 
     @Test
     void duplicateFilmTest() {
         film = new Film(MOVIE_TEST, DESCRIPTION_TEST, RELEASE_TEST, DURATION_TEST);
         film.setId(1);
-        filmController.getFilms().put(film.getId(), film);
-        assertThrows(ValidationException.class, () -> filmController.validate(film));
+        filmService.getFilms().put(film.getId(), film);
+        assertThrows(ValidationException.class, () -> filmService.validate(film));
     }
 
     @Test
