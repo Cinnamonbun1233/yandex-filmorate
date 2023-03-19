@@ -1,58 +1,94 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.InternalException;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import javax.validation.Valid;
 import java.util.*;
+import java.util.stream.Collectors;
 
-@Slf4j
 @Service
-@Data
+@RequiredArgsConstructor
+@Slf4j
 public class UserService {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int userId = 1;
+    private final UserStorage userStorage;
 
     public List<User> showAllUsers() {
-        return new ArrayList<>(users.values());
+        log.info("Инфо: список пользователей отправлен.");
+        return userStorage.showAllUsers();
     }
 
     public User createNewUser(User user) {
-        validate(user);
-        user.setId(userId++);
-        users.put(user.getId(), user);
-        log.info("Добавлен пользователь с логином '{}'.", user.getLogin());
-        return user;
+        return userStorage.createNewUser(user);
     }
 
     public User updateUser(User user) {
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Такого пользователя не существует, необходима регистрация нового пользователя");
-        }
-        users.remove(user.getId());
-        users.put(user.getId(), user);
-        log.info("Информация о пользователе '{}' обновлена.", user.getLogin());
-        return user;
+        return userStorage.updateUser(user);
     }
 
-    public void validate(@Valid @RequestBody User user) {
-        if (user.getLogin().contains(" ")) {
-            log.warn("Логин пользователя '{}'.", user.getLogin());
-            throw new ValidationException("Логин не может быть пустым или содержать пробелы.");
+    public User getUserById(int id) {
+        if (!userStorage.getUsers().containsKey(id)) {
+            throw new ObjectNotFoundException("Ошибка: пользователь не найден.");
         }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+        return userStorage.getUserById(id);
+    }
+
+    public User deleteUserById(int id) {
+        if (!userStorage.getUsers().containsKey(id)) {
+            throw new ObjectNotFoundException("Ошибка: пользователь не найден.");
         }
-        Collection<User> userCollection = users.values();
-        for (User us : userCollection) {
-            if (user.getLogin().equals(us.getLogin()) || user.getEmail().equals(us.getEmail())) {
-                log.warn("E-mail пользователя '{}' уже существует.", us);
-                throw new ValidationException("Пользователь с таким e-mail уже существует.");
-            }
+        log.info("Инфо: пользователь с id '{}' удален.", id);
+        return userStorage.deleteUserById(id);
+    }
+
+    public List<User> addFriendship(int firstId, int secondId) {
+        if (!userStorage.getUsers().containsKey(firstId) || !userStorage.getUsers().containsKey(secondId)) {
+            throw new ObjectNotFoundException(String.format("Ошибка: пользователя с id %d или %d не существует.", firstId, secondId));
         }
+        if (userStorage.getUserById(firstId).getFriends().contains(secondId)) {
+            throw new InternalException("Ошибка: пользователи уже являются друзьями.");
+        }
+        userStorage.getUserById(firstId).getFriends().add(secondId);
+        userStorage.getUserById(secondId).getFriends().add(firstId);
+        log.info("Инфо: пользователи '{}' и '{}' теперь друзья.", userStorage.getUserById(firstId).getName(),
+                userStorage.getUserById(secondId).getName());
+        return Arrays.asList(userStorage.getUserById(firstId), userStorage.getUserById(secondId));
+    }
+
+    public List<User> removeFriendship(int firstId, int secondId) {
+        if (!userStorage.getUsers().containsKey(firstId) || !userStorage.getUsers().containsKey(secondId)) {
+            throw new ObjectNotFoundException(String.format("Ошибка: пользователя с id %d или %d не существует.", firstId, secondId));
+        }
+        if (!userStorage.getUserById(firstId).getFriends().contains(secondId)) {
+            throw new InternalException("Ошибка: пользователи не являются друзьями.");
+        }
+        userStorage.getUserById(firstId).getFriends().remove(secondId);
+        userStorage.getUserById(secondId).getFriends().remove(firstId);
+        log.info("Инфо: пользователи '{}' и '{}' больше не друзья.", userStorage.getUserById(firstId).getName(),
+                userStorage.getUserById(secondId).getName());
+        return Arrays.asList(userStorage.getUserById(firstId), userStorage.getUserById(secondId));
+    }
+
+    public List<User> getFriendsListById(int id) {
+        if (!userStorage.getUsers().containsKey(id)) {
+            throw new ObjectNotFoundException("Ошибка: пользователь не найден.");
+        }
+        log.info("Инфо: запрос получения списка друзей пользователя '{}' выполнен.", userStorage.getUserById(id).getName());
+        return userStorage.getUserById(id).getFriends().stream().map(userStorage::getUserById).collect(Collectors.toList());
+    }
+
+    public List<User> getCommonFriendsList(int firstId, int secondId) {
+        if (!userStorage.getUsers().containsKey(firstId) || !userStorage.getUsers().containsKey(secondId)) {
+            throw new ObjectNotFoundException("Ошибка: пользователи не найдены.");
+        }
+        User user1 = userStorage.getUserById(firstId);
+        User user2 = userStorage.getUserById(secondId);
+        log.info("Инфо: список общих друзей '{}' и '{}' отправлен.", user1.getName(), user2.getName());
+        return user1.getFriends().stream().filter(friendId -> user2.getFriends().contains(friendId)).
+                map(userStorage::getUserById).collect(Collectors.toList());
     }
 }
