@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.InternalException;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.DatabaseObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         if (!films.containsKey(film.getId())) {
-            throw new ObjectNotFoundException("Ошибка: такого фильма не существует.");
+            throw new DatabaseObjectNotFoundException("Ошибка: такого фильма не существует.");
         }
         films.put(film.getId(), film);
         log.info("Инфо: информация о фильме '{}' обновлена.", film.getName());

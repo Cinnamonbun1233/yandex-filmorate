@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.InternalException;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.DatabaseObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -37,7 +37,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         if (!getUsers().containsKey(user.getId())) {
-            throw new ObjectNotFoundException("Ошибка: такого пользователя не существует.");
+            throw new DatabaseObjectNotFoundException("Ошибка: такого пользователя не существует.");
         }
         validateUsers(user);
         users.put(user.getId(), user);

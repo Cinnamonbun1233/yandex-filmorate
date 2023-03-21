@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InternalException;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.DatabaseObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+
+    public Map<Integer, User> getUsers(){
+        return userStorage.getUsers();
+    }
 
     public List<User> showAllUsers() {
         log.info("Инфо: список пользователей отправлен.");
@@ -32,14 +36,14 @@ public class UserService {
 
     public User getUserById(int id) {
         if (!userStorage.getUsers().containsKey(id)) {
-            throw new ObjectNotFoundException("Ошибка: пользователь не найден.");
+            throw new DatabaseObjectNotFoundException("Ошибка: пользователь не найден.");
         }
         return userStorage.getUserById(id);
     }
 
     public User deleteUserById(int id) {
         if (!userStorage.getUsers().containsKey(id)) {
-            throw new ObjectNotFoundException("Ошибка: пользователь не найден.");
+            throw new DatabaseObjectNotFoundException("Ошибка: пользователь не найден.");
         }
         log.info("Инфо: пользователь с id '{}' удален.", id);
         return userStorage.deleteUserById(id);
@@ -47,7 +51,7 @@ public class UserService {
 
     public List<User> addFriendship(int firstId, int secondId) {
         if (!userStorage.getUsers().containsKey(firstId) || !userStorage.getUsers().containsKey(secondId)) {
-            throw new ObjectNotFoundException(String.format("Ошибка: пользователя с id %d или %d не существует.", firstId, secondId));
+            throw new DatabaseObjectNotFoundException(String.format("Ошибка: пользователя с id %d или %d не существует.", firstId, secondId));
         }
         if (userStorage.getUserById(firstId).getFriends().contains(secondId)) {
             throw new InternalException("Ошибка: пользователи уже являются друзьями.");
@@ -61,7 +65,7 @@ public class UserService {
 
     public List<User> removeFriendship(int firstId, int secondId) {
         if (!userStorage.getUsers().containsKey(firstId) || !userStorage.getUsers().containsKey(secondId)) {
-            throw new ObjectNotFoundException(String.format("Ошибка: пользователя с id %d или %d не существует.", firstId, secondId));
+            throw new DatabaseObjectNotFoundException(String.format("Ошибка: пользователя с id %d или %d не существует.", firstId, secondId));
         }
         if (!userStorage.getUserById(firstId).getFriends().contains(secondId)) {
             throw new InternalException("Ошибка: пользователи не являются друзьями.");
@@ -75,7 +79,7 @@ public class UserService {
 
     public List<User> getFriendsListById(int id) {
         if (!userStorage.getUsers().containsKey(id)) {
-            throw new ObjectNotFoundException("Ошибка: пользователь не найден.");
+            throw new DatabaseObjectNotFoundException("Ошибка: пользователь не найден.");
         }
         log.info("Инфо: запрос получения списка друзей пользователя '{}' выполнен.", userStorage.getUserById(id).getName());
         return userStorage.getUserById(id).getFriends().stream().map(userStorage::getUserById).collect(Collectors.toList());
@@ -83,7 +87,7 @@ public class UserService {
 
     public List<User> getCommonFriendsList(int firstId, int secondId) {
         if (!userStorage.getUsers().containsKey(firstId) || !userStorage.getUsers().containsKey(secondId)) {
-            throw new ObjectNotFoundException("Ошибка: пользователи не найдены.");
+            throw new DatabaseObjectNotFoundException("Ошибка: пользователи не найдены.");
         }
         User user1 = userStorage.getUserById(firstId);
         User user2 = userStorage.getUserById(secondId);
