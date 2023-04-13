@@ -2,9 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.InternalException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -22,6 +23,7 @@ public class UserControllerTest {
     private final LocalDate TEST_DATE = LocalDate.of(1992, 10, 18);
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     UserService userService;
+    InMemoryUserStorage userStorage;
     User user;
     private Validator validator = factory.getValidator();
 
@@ -29,27 +31,28 @@ public class UserControllerTest {
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        userService = new UserService();
+        userStorage = new InMemoryUserStorage();
+        userService = new UserService(userStorage);
     }
 
     @Test
     void userWithoutNameTest() {
         user = new User(TEST_EMAIL, TEST_LOGIN, TEST_DATE);
-        userService.validate(user);
+        userStorage.validateUsers(user);
         assertEquals(TEST_LOGIN, user.getName());
 
         user = new User(TEST_EMAIL, TEST_LOGIN, TEST_DATE);
         user.setName(" ");
-        userService.validate(user);
-        assertEquals(TEST_LOGIN, user.getLogin());
+        userStorage.validateUsers(user);
+        assertEquals(TEST_LOGIN, user.getName());
     }
 
     @Test
     void duplicateUserTest() {
         user = new User(TEST_EMAIL, TEST_LOGIN, TEST_DATE);
         user.setId(1);
-        userService.getUsers().put(user.getId(), user);
-        assertThrows(ValidationException.class, () -> userService.validate(user));
+        userStorage.getUsers().put(user.getId(), user);
+        assertThrows(InternalException.class, () -> userStorage.checkUsers(user));
     }
 
     @Test
@@ -66,7 +69,7 @@ public class UserControllerTest {
         user = new User("null", TEST_LOGIN, TEST_DATE);
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         assertFalse(violations.isEmpty());
-        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.size()).isEqualTo(2);
         System.out.println(violations);
     }
 

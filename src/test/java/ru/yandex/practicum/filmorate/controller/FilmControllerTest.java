@@ -2,9 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.InternalException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -24,6 +25,7 @@ public class FilmControllerTest {
     private final static LocalDate RELEASE_TEST = LocalDate.of(2014, 10, 26);
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     FilmService filmService;
+    InMemoryFilmStorage filmStorage;
     Film film;
     private Validator validator = factory.getValidator();
 
@@ -31,21 +33,24 @@ public class FilmControllerTest {
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        filmService = new FilmService();
+        filmStorage = new InMemoryFilmStorage();
+        filmService = new FilmService(filmStorage);
     }
 
     @Test
     void releaseDateBefore1985() {
         film = new Film(MOVIE_TEST, DESCRIPTION_TEST, LocalDate.of(1894, 1, 1), DURATION_TEST);
-        assertThrows(ValidationException.class, () -> filmService.validate(film));
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertFalse(violations.isEmpty());
+        assertThat(violations.size()).isEqualTo(1);
     }
 
     @Test
     void duplicateFilmTest() {
         film = new Film(MOVIE_TEST, DESCRIPTION_TEST, RELEASE_TEST, DURATION_TEST);
         film.setId(1);
-        filmService.getFilms().put(film.getId(), film);
-        assertThrows(ValidationException.class, () -> filmService.validate(film));
+        filmStorage.getFilms().put(film.getId(), film);
+        assertThrows(InternalException.class, () -> filmStorage.checkFilms(film));
     }
 
     @Test
@@ -53,7 +58,7 @@ public class FilmControllerTest {
         film = new Film("", DESCRIPTION_TEST, LocalDate.of(1894, 1, 2), 169);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
-        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.size()).isEqualTo(2);
     }
 
     @Test
@@ -61,7 +66,7 @@ public class FilmControllerTest {
         film = new Film(" ", DESCRIPTION_TEST, LocalDate.of(1894, 1, 2), 169);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
-        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.size()).isEqualTo(2);
     }
 
     @Test
@@ -69,7 +74,7 @@ public class FilmControllerTest {
         film = new Film(null, DESCRIPTION_TEST, LocalDate.of(1894, 1, 2), 169);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
-        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.size()).isEqualTo(2);
     }
 
     @Test
@@ -105,7 +110,7 @@ public class FilmControllerTest {
                 + "in search of a new home for mankind. ", LocalDate.of(1894, 1, 2), 169);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
-        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.size()).isEqualTo(2);
     }
 
     @Test
@@ -113,6 +118,6 @@ public class FilmControllerTest {
         film = new Film(MOVIE_TEST, DESCRIPTION_TEST, RELEASE_TEST, 0);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
-        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.size()).isEqualTo(2);
     }
 }
