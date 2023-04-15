@@ -1,27 +1,31 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import lombok.*;
 import ru.yandex.practicum.filmorate.validate.MovieDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder(toBuilder = true)
 public class Film {
     @PositiveOrZero
     private int id;
-    private Set<Integer> userLikes = new HashSet<>();
     @NotBlank(message = "Ошибка: название фильма неправильное.")
-    private final String name;
-    @NotBlank(message = "Ошибка: описание фильма отсутствует.")
+    private String name;
+    @NotNull(message = "Ошибка: описание фильма отсутствует.")
     @Size(max = 200, message = "Ошибка: описание фильма больше 200 символов.")
-    private final String description;
+    private String description;
     @NotNull
     @MovieDate
-    private final LocalDate releaseDate;
+    private LocalDate releaseDate;
     @Min(value = 1, message = "Ошибка: неправильная продолжительность фильма.")
     @Positive
-    private final long duration;
+    private long duration;
+    private Mpa mpa;
+    private List<Genre> genres;
 }
