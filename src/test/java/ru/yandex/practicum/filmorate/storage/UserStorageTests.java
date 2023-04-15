@@ -21,12 +21,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserStorageTests {
     private final InDbUserStorage inDbUserStorage;
-    private final String EXAMPLE_EMAIL = "example@mail.mail";
 
     @Test
     void addUserTest() {
         User user = User.builder()
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
@@ -40,7 +39,7 @@ public class UserStorageTests {
     @Test
     void findUserByIdTest() {
         User user = User.builder()
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
@@ -53,7 +52,7 @@ public class UserStorageTests {
     @Test
     void updateUserByIdTest() {
         User user = User.builder()
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
@@ -75,7 +74,7 @@ public class UserStorageTests {
         User user = User.builder()
                 .id(9999)
                 .login("testName")
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .birthday(LocalDate.of(2000, 12, 22))
                 .build();
         Assertions.assertThatThrownBy(() -> inDbUserStorage.updateUser(user))
@@ -184,7 +183,7 @@ public class UserStorageTests {
     @Test
     void getAllUsersTest() {
         User user = User.builder()
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
@@ -200,7 +199,7 @@ public class UserStorageTests {
     @Test
     void removeUserByIdTest() {
         User user = User.builder()
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))

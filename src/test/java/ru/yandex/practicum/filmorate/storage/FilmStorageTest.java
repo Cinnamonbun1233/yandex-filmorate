@@ -24,13 +24,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class FilmStorageTest {
     private final InDbFilmStorage inDbFilmStorage;
     private final InDbUserStorage inDbUserStorage;
-    private final String EXAMPLE_EMAIL = "example@mail.mail";
-    private final String TEST_FILM = "testFilm";
-    private final String DESC = "desc";
 
     private Film film = Film.builder()
-            .name(TEST_FILM)
-            .description(DESC)
+            .name("testFilm")
+            .description("desc")
             .releaseDate(LocalDate.of(2020, 1, 1))
             .duration(110)
             .mpa(new Mpa(1, "G"))
@@ -60,8 +57,8 @@ public class FilmStorageTest {
     void getFilmTest() {
         inDbFilmStorage.createNewFilm(film);
         inDbFilmStorage.getFilmById(film.getId());
-        AssertionsForClassTypes.assertThat(inDbFilmStorage.getFilmById(film.getId())).
-                hasFieldOrPropertyWithValue("id", film.getId());
+        AssertionsForClassTypes.assertThat(inDbFilmStorage.getFilmById(film.getId()))
+                .hasFieldOrPropertyWithValue("id", film.getId());
     }
 
     @Test
@@ -75,8 +72,8 @@ public class FilmStorageTest {
     void updateFilmNotFoundTest() {
         Film filmForUpdate = Film.builder()
                 .id(9999)
-                .name(TEST_FILM)
-                .description((DESC))
+                .name("testFilm")
+                .description(("desc"))
                 .releaseDate(LocalDate.of(2020, 1, 1))
                 .mpa(new Mpa(1, "G"))
                 .genres(null)
@@ -89,15 +86,15 @@ public class FilmStorageTest {
     void addLikeFilmTest() {
         User user = User.builder()
                 .id(1)
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
                 .build();
 
         Film filmForLike = Film.builder()
-                .name(TEST_FILM)
-                .description(DESC)
+                .name("testFilm")
+                .description("desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
                 .duration(110)
                 .mpa(new Mpa(1, "G"))
@@ -118,15 +115,15 @@ public class FilmStorageTest {
     void removeFilmLikeTest() {
         User user1 = User.builder()
                 .id(1)
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
                 .build();
 
         Film filmForLike = Film.builder()
-                .name(TEST_FILM)
-                .description(DESC)
+                .name("testFilm")
+                .description("desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
                 .duration(110)
                 .mpa(new Mpa(1, "G"))
@@ -147,8 +144,8 @@ public class FilmStorageTest {
     void getBestFilmTest() {
 
         Film filmForLike = Film.builder()
-                .name(TEST_FILM)
-                .description(DESC)
+                .name("testFilm")
+                .description("desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
                 .duration(110)
                 .mpa(new Mpa(1, "G"))
@@ -156,8 +153,8 @@ public class FilmStorageTest {
                 .build();
 
         Film otherFilmForLike = Film.builder()
-                .name(TEST_FILM)
-                .description(DESC)
+                .name("testFilm")
+                .description("desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
                 .duration(110)
                 .mpa(new Mpa(1, "G"))
@@ -170,7 +167,7 @@ public class FilmStorageTest {
 
         User user = User.builder()
                 .id(1)
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
@@ -178,7 +175,7 @@ public class FilmStorageTest {
 
         User user1 = User.builder()
                 .id(1)
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
@@ -186,7 +183,7 @@ public class FilmStorageTest {
 
         User user2 = User.builder()
                 .id(1)
-                .email(EXAMPLE_EMAIL)
+                .email("example@mail.mail")
                 .login("login")
                 .name("Doe")
                 .birthday(LocalDate.of(2000, 12, 22))
