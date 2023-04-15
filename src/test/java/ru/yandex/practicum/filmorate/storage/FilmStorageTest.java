@@ -44,12 +44,12 @@ public class FilmStorageTest {
     @Test
     void updateFilmTest() {
         inDbFilmStorage.createNewFilm(film);
-        String TEST_UPDATE_FILM = "testUpdateFilm";
-        film.setName(TEST_UPDATE_FILM);
+        String testUpdateFilm = "testUpdateFilm";
+        film.setName(testUpdateFilm);
         film.setDescription("testUpdateDesc");
         inDbFilmStorage.updateFilm(film);
         AssertionsForClassTypes.assertThat(inDbFilmStorage.getFilmById(film.getId()))
-                .hasFieldOrPropertyWithValue("name", TEST_UPDATE_FILM)
+                .hasFieldOrPropertyWithValue("name", testUpdateFilm)
                 .hasFieldOrPropertyWithValue("description", "testUpdateDesc");
     }
 
