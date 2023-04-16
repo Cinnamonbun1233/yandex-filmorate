@@ -36,8 +36,8 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}")
-    public Film deleteFilmById(@PathVariable int id) {
-        return filmService.deleteFilmById(id);
+    public void deleteFilmById(@PathVariable int id) {
+        filmService.deleteFilmById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")

@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.Value;
 
 @Data
+@Value
 public class ErrorResponse {
-    private final String error;
-    private final String description;
+    String error;
+    String description;
 }

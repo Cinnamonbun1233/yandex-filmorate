@@ -31,12 +31,12 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 
-    public User deleteUserById(int id) {
-        return userStorage.deleteUserById(id);
+    public void deleteUserById(int id) {
+        userStorage.deleteUserById(id);
     }
 
-    public List<Integer> addFriendship(int firstId, int secondId) {
-        return userStorage.addFriendship(firstId, secondId);
+    public void addFriendship(int firstId, int secondId) {
+        userStorage.addFriendship(firstId, secondId);
     }
 
     public List<Integer> removeFriendship(int firstId, int secondId) {

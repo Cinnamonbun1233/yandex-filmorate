@@ -3,14 +3,14 @@ package ru.yandex.practicum.filmorate.storage.genre;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EmptyResultDataAccessException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @Repository
@@ -27,14 +27,8 @@ public class InDbGenreStorage implements GenreStorage {
     @Override
     public Genre getGenreById(int id) {
         final String sqlQuery = "SELECT * FROM genre WHERE genre_id = ?";
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-
-        if (!genreRows.next()) {
-            log.warn("Жанр '{}' не найден.", id);
-            throw new ObjectNotFoundException("Жанр не найден.");
-        }
-
-        return jdbcTemplate.queryForObject(sqlQuery, this::makeGenre, id);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::makeGenre, id))
+                .orElseThrow(() -> new EmptyResultDataAccessException("Жанр не найден."));
     }
 
     private Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {

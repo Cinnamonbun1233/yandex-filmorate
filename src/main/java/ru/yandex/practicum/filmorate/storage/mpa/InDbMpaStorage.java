@@ -5,12 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EmptyResultDataAccessException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @Repository
@@ -27,13 +29,8 @@ public class InDbMpaStorage implements MpaStorage {
     @Override
     public Mpa getMpaById(int id) {
         String sqlQuery = "SELECT * FROM mpa WHERE id = ?";
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-
-        if (!mpaRows.next()) {
-            log.warn("Рейтинг '{}' не найден.", id);
-            throw new ObjectNotFoundException("Рейтинг не найден.");
-        }
-        return jdbcTemplate.queryForObject(sqlQuery, this::makeMpa, id);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::makeMpa, id))
+                .orElseThrow(() -> new EmptyResultDataAccessException("Рейтинг не найден."));
     }
 
     private Mpa makeMpa(ResultSet resultSet, int rowNum) throws SQLException {

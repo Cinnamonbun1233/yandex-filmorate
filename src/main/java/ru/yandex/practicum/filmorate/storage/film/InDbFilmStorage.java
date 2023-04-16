@@ -7,7 +7,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EmptyResultDataAccessException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -71,12 +73,13 @@ public class InDbFilmStorage implements FilmStorage {
 
         if (!filmRows.next()) {
             log.warn("Фильм с id '{}' не найден.", film.getId());
-            throw new ObjectNotFoundException("Фильм не найден.");
+            throw new EntityNotFoundException("Фильм не найден.");
         }
 
         final String sqlQuery = "UPDATE films SET name = ?, description = ?, release_date = ?, " +
                 "duration = ? " +
                 "WHERE id = ?";
+
         if (film.getMpa() != null) {
             final String deleteMpa = "DELETE FROM mpa_films WHERE film_id = ?";
             final String updateMpa = "INSERT INTO mpa_films (film_id, mpa_id) VALUES (?, ?)";
@@ -108,21 +111,13 @@ public class InDbFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(int id) {
-        String checkQuery = "SELECT * FROM films WHERE id = ?";
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(checkQuery, id);
-
-        if (!filmRows.next()) {
-            log.warn("Фильм с идентификатором '{}' не найден.", id);
-            throw new ObjectNotFoundException("Фильм не найден.");
-        }
-
         final String sqlQuery = "SELECT * FROM films WHERE id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, id);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, id))
+                .orElseThrow(() -> new EmptyResultDataAccessException("Фильм не найден"));
     }
 
     @Override
-    public Film deleteFilmById(int id) {
-        Film film = getFilmById(id);
+    public void deleteFilmById(int id) {
         final String genresSqlQuery = "DELETE FROM film_genre WHERE film_id = ?";
         String mpaSqlQuery = "DELETE FROM mpa_films WHERE film_id = ?";
 
@@ -131,7 +126,6 @@ public class InDbFilmStorage implements FilmStorage {
         final String sqlQuery = "DELETE FROM films WHERE id = ?";
 
         jdbcTemplate.update(sqlQuery, id);
-        return film;
     }
 
     @Override
@@ -211,7 +205,7 @@ public class InDbFilmStorage implements FilmStorage {
 
         if (!filmsRows.next() || !userRows.next()) {
             log.warn("Фильм '{}' и(или) пользователь '{}' не найден.", filmId, userId);
-            throw new ObjectNotFoundException("Фильм или пользователь не найдены.");
+            throw new EntityNotFoundException("Фильм или пользователь не найдены.");
         }
     }
 }

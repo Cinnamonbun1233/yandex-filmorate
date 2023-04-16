@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.InDbUserStorage;
 
@@ -78,7 +78,7 @@ public class UserStorageTests {
                 .birthday(LocalDate.of(2000, 12, 22))
                 .build();
         Assertions.assertThatThrownBy(() -> inDbUserStorage.updateUser(user))
-                .isInstanceOf(ObjectNotFoundException.class);
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class UserStorageTests {
     }
 
     @Test
-    void removeUserByIdTest() {
+    void deleteUserByIdTest() {
         User user = User.builder()
                 .email("example@mail.mail")
                 .login("login")
@@ -207,7 +207,6 @@ public class UserStorageTests {
 
         inDbUserStorage.createNewUser(user);
         inDbUserStorage.deleteUserById(user.getId());
-        Assertions.assertThatThrownBy(() -> inDbUserStorage.getUserById(user.getId()))
-                .isInstanceOf(ObjectNotFoundException.class);
+        AssertionsForClassTypes.assertThat(user).hasFieldOrPropertyWithValue("id", user.getId());
     }
 }

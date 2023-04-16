@@ -7,7 +7,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EmptyResultDataAccessException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -61,7 +63,7 @@ public class InDbUserStorage implements UserStorage {
 
         if (!filmRows.next()) {
             log.warn("Пользователь с id '{}' не найден.", user.getId());
-            throw new ObjectNotFoundException("Пользователь не найден.");
+            throw new EntityNotFoundException("Пользователь не найден.");
         }
 
         final String sqlQuery = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? " +
@@ -76,31 +78,20 @@ public class InDbUserStorage implements UserStorage {
     @Override
     public User getUserById(int id) {
         final String sqlQuery = "SELECT * FROM users WHERE id = ?";
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-
-        if (!filmRows.next()) {
-            log.warn("Пользователь с идентификатором '{}' не найден.", id);
-            throw new ObjectNotFoundException("Пользователь не найден.");
-        }
-
-        final String checkQuery = "SELECT * FROM users WHERE id = ?";
-
-        log.info("Пользователь с id '{}' отправлен.", id);
-        return jdbcTemplate.queryForObject(checkQuery, this::makeUser, id);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::makeUser, id))
+                .orElseThrow(() -> new EmptyResultDataAccessException("Пользователь не найден"));
     }
 
     @Override
-    public User deleteUserById(int id) {
+    public void deleteUserById(int id) {
         final String sqlQuery = "DELETE FROM users WHERE id = ?";
-        User user = getUserById(id);
 
         jdbcTemplate.update(sqlQuery, id);
         log.info("Пользователь с id '{}' удален.", id);
-        return user;
     }
 
     @Override
-    public List<Integer> addFriendship(int followedId, int followerId) {
+    public void addFriendship(int followedId, int followerId) {
         validate(followedId, followerId);
         final String sqlForWriteQuery = "INSERT INTO mutual_friendship (user_id, friend_id, status) " +
                 "VALUES (?, ?, ?)";
@@ -116,7 +107,6 @@ public class InDbUserStorage implements UserStorage {
         }
 
         log.info("Пользователь '{}' подписался на '{}'.", followedId, followerId);
-        return List.of(followedId, followerId);
     }
 
     @Override
@@ -135,7 +125,7 @@ public class InDbUserStorage implements UserStorage {
 
         if (!followingRow.next()) {
             log.warn("Пользователь с id '{}' не найден.", id);
-            throw new ObjectNotFoundException("Пользователь не найден.");
+            throw new EntityNotFoundException("Пользователь не найден.");
         }
 
         final String sqlQuery = "SELECT id, email, login, name, birthday " +
@@ -180,7 +170,7 @@ public class InDbUserStorage implements UserStorage {
 
         if (!followingRow.next() || !followerRow.next()) {
             log.warn("Пользователи с id '{}' и '{}' не найдены.", followedId, followerId);
-            throw new ObjectNotFoundException("Пользователи не найдены.");
+            throw new EntityNotFoundException("Пользователи не найдены.");
         }
     }
 }
