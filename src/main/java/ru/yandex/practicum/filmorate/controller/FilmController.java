@@ -1,12 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
-import ru.yandex.practicum.filmorate.service.FilmService;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,8 +36,8 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}")
-    public Film deleteFilmById(@PathVariable int id) {
-        return filmService.deleteFilmById(id);
+    public void deleteFilmById(@PathVariable int id) {
+        filmService.deleteFilmById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -50,7 +51,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
+    public List<Film> getBestFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
         return filmService.getBestFilms(count);
     }
 }

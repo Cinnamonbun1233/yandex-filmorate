@@ -6,7 +6,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,7 +16,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public List<User> showAllUsers() {
+    public Collection<User> showAllUsers() {
         return userService.showAllUsers();
     }
 
@@ -30,22 +31,22 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable int id){
+    public User getUserById(@PathVariable int id) {
         return userService.getUserById(id);
     }
 
     @DeleteMapping("/{id}")
-    public User deleteUserById(@PathVariable int id) {
-        return userService.deleteUserById(id);
+    public void deleteUserById(@PathVariable int id) {
+        userService.deleteUserById(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public List<User> addFriendship(@PathVariable int id, @PathVariable int friendId) {
-        return userService.addFriendship(id, friendId);
+    public void addFriendship(@PathVariable int id, @PathVariable int friendId) {
+        userService.addFriendship(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public List<User> removeFriendship(@PathVariable int id, @PathVariable int friendId) {
+    public List<Integer> removeFriendship(@PathVariable int id, @PathVariable int friendId) {
         return userService.removeFriendship(id, friendId);
     }
 
